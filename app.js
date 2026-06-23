@@ -1,11 +1,45 @@
-const cards = window.VOCAB_2026_06_23;
+const days = window.LEARN_SPANISH_DAYS;
 
-const STORAGE_KEY = "learnspanishart-2026-06-23";
+let currentDayIndex = 0;
+let currentMode = "flashcards";
 
-let currentIndex = 0;
+let currentCardIndex = 0;
+let currentSentenceIndex = 0;
 let flipped = false;
 
-const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+function getCurrentDay() {
+  return days[currentDayIndex];
+}
+
+function getStorageKey(type) {
+  const day = getCurrentDay();
+  return `learnspanishart-${day.id}-${type}`;
+}
+
+function loadSaved(type) {
+  return JSON.parse(localStorage.getItem(getStorageKey(type))) || {};
+}
+
+function saveProgress(type, data) {
+  localStorage.setItem(getStorageKey(type), JSON.stringify(data));
+}
+
+let savedCards = loadSaved("flashcards");
+let savedSentences = loadSaved("sentences");
+
+const dateLabel = document.getElementById("dateLabel");
+const progressText = document.getElementById("progressText");
+const scoreText = document.getElementById("scoreText");
+const progressFill = document.getElementById("progressFill");
+const goalText = document.getElementById("goalText");
+
+const flashcardMode = document.getElementById("flashcardMode");
+const sentenceMode = document.getElementById("sentenceMode");
+const libraryMode = document.getElementById("libraryMode");
+
+const flashcardModeBtn = document.getElementById("flashcardModeBtn");
+const sentenceModeBtn = document.getElementById("sentenceModeBtn");
+const libraryModeBtn = document.getElementById("libraryModeBtn");
 
 const flashcard = document.getElementById("flashcard");
 const spanishWord = document.getElementById("spanishWord");
@@ -13,10 +47,6 @@ const englishWord = document.getElementById("englishWord");
 const wordType = document.getElementById("wordType");
 const answerInput = document.getElementById("answerInput");
 const judgement = document.getElementById("judgement");
-
-const progressText = document.getElementById("progressText");
-const scoreText = document.getElementById("scoreText");
-const progressFill = document.getElementById("progressFill");
 
 const checkBtn = document.getElementById("checkBtn");
 const knowBtn = document.getElementById("knowBtn");
@@ -26,6 +56,21 @@ const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 const flipBtn = document.getElementById("flipBtn");
 const resetBtn = document.getElementById("resetBtn");
+
+const sentenceText = document.getElementById("sentenceText");
+const wordBank = document.getElementById("wordBank");
+const wordHint = document.getElementById("wordHint");
+const sentenceAnswer = document.getElementById("sentenceAnswer");
+const showSentenceAnswerBtn = document.getElementById("showSentenceAnswerBtn");
+const sentenceCorrectAnswer = document.getElementById("sentenceCorrectAnswer");
+
+const sentenceNotCloseBtn = document.getElementById("sentenceNotCloseBtn");
+const sentenceAlmostBtn = document.getElementById("sentenceAlmostBtn");
+const sentenceCorrectBtn = document.getElementById("sentenceCorrectBtn");
+const sentencePrevBtn = document.getElementById("sentencePrevBtn");
+const sentenceNextBtn = document.getElementById("sentenceNextBtn");
+
+const libraryList = document.getElementById("libraryList");
 
 function normalize(text) {
   return text
@@ -41,7 +86,6 @@ function roughJudge(userAnswer, correctAnswer) {
   const correct = normalize(correctAnswer);
 
   if (!user) return "empty";
-
   if (user === correct) return "correct";
 
   if (correct.includes(user) || user.includes(correct)) {
@@ -59,35 +103,69 @@ function roughJudge(userAnswer, correctAnswer) {
   return "wrong";
 }
 
-function saveProgress() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-}
+function setMode(mode) {
+  currentMode = mode;
 
-function getMasteredCount() {
-  return cards.filter(card => saved[card.spanish] === "know").length;
+  flashcardMode.classList.toggle("hidden", mode !== "flashcards");
+  sentenceMode.classList.toggle("hidden", mode !== "sentences");
+  libraryMode.classList.toggle("hidden", mode !== "library");
+
+  updateProgress();
+
+  if (mode === "flashcards") renderCard();
+  if (mode === "sentences") renderSentence();
+  if (mode === "library") renderLibrary();
 }
 
 function updateProgress() {
-  const mastered = getMasteredCount();
-  const percent = Math.round((mastered / cards.length) * 100);
+  const day = getCurrentDay();
 
-  progressText.textContent = `${mastered} / ${cards.length} mastered`;
+  dateLabel.textContent = `${day.title} · ${day.label}`;
+
+  let total = 0;
+  let completed = 0;
+  let label = "";
+
+  if (currentMode === "flashcards") {
+    total = day.vocab.length;
+    completed = day.vocab.filter(card => savedCards[card.spanish] === "know").length;
+    label = "mastered";
+  }
+
+  if (currentMode === "sentences") {
+    total = day.sentences.length;
+    completed = day.sentences.filter(sentence => savedSentences[sentence.spanish] === "correct").length;
+    label = "understood";
+  }
+
+  if (currentMode === "library") {
+    total = days.length;
+    completed = days.length;
+    label = "days available";
+  }
+
+  const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+  progressText.textContent = `${completed} / ${total} ${label}`;
   scoreText.textContent = `${percent}%`;
   progressFill.style.width = `${percent}%`;
 
-  if (percent >= 85) {
-    document.getElementById("goalText").textContent = "Goal hit: 85% understood";
+  if (percent >= 85 && currentMode !== "library") {
+    goalText.textContent = "Goal hit: 85% understood";
+  } else if (currentMode === "library") {
+    goalText.textContent = "Choose a vocab day to study.";
   } else {
-    document.getElementById("goalText").textContent = "Goal: 85% understood";
+    goalText.textContent = "Goal: 85% understood";
   }
 }
 
 function renderCard() {
-  const card = cards[currentIndex];
+  const day = getCurrentDay();
+  const card = day.vocab[currentCardIndex];
 
   spanishWord.textContent = card.spanish;
   englishWord.textContent = card.english;
-  wordType.textContent = `${card.type} · ${currentIndex + 1} / ${cards.length}`;
+  wordType.textContent = `${card.type} · ${currentCardIndex + 1} / ${day.vocab.length}`;
 
   answerInput.value = "";
   judgement.textContent = "";
@@ -104,19 +182,91 @@ function flipCard() {
 }
 
 function gradeCurrentCard(grade) {
-  const card = cards[currentIndex];
-  saved[card.spanish] = grade;
-  saveProgress();
+  const day = getCurrentDay();
+  const card = day.vocab[currentCardIndex];
 
-  if (currentIndex < cards.length - 1) {
-    currentIndex++;
+  savedCards[card.spanish] = grade;
+  saveProgress("flashcards", savedCards);
+
+  if (currentCardIndex < day.vocab.length - 1) {
+    currentCardIndex++;
   }
 
   renderCard();
 }
 
+function renderSentence() {
+  const day = getCurrentDay();
+  const sentence = day.sentences[currentSentenceIndex];
+
+  sentenceText.textContent = sentence.spanish;
+  sentenceAnswer.value = "";
+  sentenceCorrectAnswer.textContent = "";
+  wordHint.textContent = "Click a word to see its English meaning.";
+
+  wordBank.innerHTML = "";
+
+  sentence.words.forEach(word => {
+    const button = document.createElement("button");
+    button.className = "word-chip";
+    button.textContent = word.es;
+
+    button.addEventListener("click", () => {
+      wordHint.textContent = `${word.es} = ${word.en}`;
+    });
+
+    wordBank.appendChild(button);
+  });
+
+  updateProgress();
+}
+
+function gradeCurrentSentence(grade) {
+  const day = getCurrentDay();
+  const sentence = day.sentences[currentSentenceIndex];
+
+  savedSentences[sentence.spanish] = grade;
+  saveProgress("sentences", savedSentences);
+
+  if (currentSentenceIndex < day.sentences.length - 1) {
+    currentSentenceIndex++;
+  }
+
+  renderSentence();
+}
+
+function renderLibrary() {
+  libraryList.innerHTML = "";
+
+  days.forEach((day, index) => {
+    const button = document.createElement("button");
+    button.className = "library-day";
+
+    button.innerHTML = `
+      <strong>${day.label} — ${day.title}</strong>
+      <span>${day.vocab.length} vocab words · ${day.sentences.length} sentences</span>
+    `;
+
+    button.addEventListener("click", () => {
+      currentDayIndex = index;
+      currentCardIndex = 0;
+      currentSentenceIndex = 0;
+
+      savedCards = loadSaved("flashcards");
+      savedSentences = loadSaved("sentences");
+
+      setMode("flashcards");
+    });
+
+    libraryList.appendChild(button);
+  });
+
+  updateProgress();
+}
+
 checkBtn.addEventListener("click", () => {
-  const card = cards[currentIndex];
+  const day = getCurrentDay();
+  const card = day.vocab[currentCardIndex];
   const result = roughJudge(answerInput.value, card.english);
 
   if (result === "correct") {
@@ -138,15 +288,17 @@ almostBtn.addEventListener("click", () => gradeCurrentCard("almost"));
 dontKnowBtn.addEventListener("click", () => gradeCurrentCard("dontKnow"));
 
 prevBtn.addEventListener("click", () => {
-  if (currentIndex > 0) {
-    currentIndex--;
+  if (currentCardIndex > 0) {
+    currentCardIndex--;
     renderCard();
   }
 });
 
 nextBtn.addEventListener("click", () => {
-  if (currentIndex < cards.length - 1) {
-    currentIndex++;
+  const day = getCurrentDay();
+
+  if (currentCardIndex < day.vocab.length - 1) {
+    currentCardIndex++;
     renderCard();
   }
 });
@@ -155,10 +307,51 @@ flipBtn.addEventListener("click", flipCard);
 flashcard.addEventListener("click", flipCard);
 
 resetBtn.addEventListener("click", () => {
-  localStorage.removeItem(STORAGE_KEY);
-  Object.keys(saved).forEach(key => delete saved[key]);
-  currentIndex = 0;
+  localStorage.removeItem(getStorageKey("flashcards"));
+  savedCards = {};
+  currentCardIndex = 0;
   renderCard();
 });
 
-renderCard();
+showSentenceAnswerBtn.addEventListener("click", () => {
+  const day = getCurrentDay();
+  const sentence = day.sentences[currentSentenceIndex];
+
+  const result = roughJudge(sentenceAnswer.value, sentence.english);
+
+  if (result === "correct") {
+    sentenceCorrectAnswer.textContent = `Correct. ${sentence.english}`;
+  } else if (result === "close") {
+    sentenceCorrectAnswer.textContent = `Close. Correct answer: ${sentence.english}`;
+  } else if (result === "empty") {
+    sentenceCorrectAnswer.textContent = "Write your translation first.";
+  } else {
+    sentenceCorrectAnswer.textContent = `Not close yet. Correct answer: ${sentence.english}`;
+  }
+});
+
+sentenceCorrectBtn.addEventListener("click", () => gradeCurrentSentence("correct"));
+sentenceAlmostBtn.addEventListener("click", () => gradeCurrentSentence("almost"));
+sentenceNotCloseBtn.addEventListener("click", () => gradeCurrentSentence("notClose"));
+
+sentencePrevBtn.addEventListener("click", () => {
+  if (currentSentenceIndex > 0) {
+    currentSentenceIndex--;
+    renderSentence();
+  }
+});
+
+sentenceNextBtn.addEventListener("click", () => {
+  const day = getCurrentDay();
+
+  if (currentSentenceIndex < day.sentences.length - 1) {
+    currentSentenceIndex++;
+    renderSentence();
+  }
+});
+
+flashcardModeBtn.addEventListener("click", () => setMode("flashcards"));
+sentenceModeBtn.addEventListener("click", () => setMode("sentences"));
+libraryModeBtn.addEventListener("click", () => setMode("library"));
+
+setMode("flashcards");

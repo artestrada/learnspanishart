@@ -3,64 +3,135 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Learn Spanish Art</title>
+
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <main class="app">
     <section class="top">
       <h1>Learn Spanish Art</h1>
-      <p id="dateLabel">Daily vocab: 6/23/26</p>
+      <p id="dateLabel">Daily vocab</p>
 
       <div class="progress-wrap">
         <div class="progress-text">
           <span id="progressText">0 / 0 mastered</span>
           <span id="scoreText">0%</span>
         </div>
+
         <div class="progress-bar">
           <div id="progressFill"></div>
         </div>
+
         <p id="goalText">Goal: 85% understood</p>
       </div>
     </section>
 
-    <section class="card-area">
-      <div id="flashcard" class="flashcard">
-        <div class="card-face card-front">
-          <p class="label">Spanish</p>
-          <h2 id="spanishWord"></h2>
-          <p id="wordType"></p>
+    <!-- FLASHCARD MODE -->
+    <section id="flashcardMode" class="mode-section">
+      <section class="card-area">
+        <div id="flashcard" class="flashcard">
+          <div class="card-face card-front">
+            <p class="label">Spanish</p>
+            <h2 id="spanishWord"></h2>
+            <p id="wordType"></p>
+          </div>
+
+          <div class="card-face card-back">
+            <p class="label">English</p>
+            <h2 id="englishWord"></h2>
+          </div>
+        </div>
+      </section>
+
+      <section class="controls">
+        <input id="answerInput" placeholder="Type the meaning in English..." />
+
+        <button id="checkBtn">Check</button>
+
+        <p id="judgement"></p>
+
+        <div class="grade-buttons">
+          <button id="dontKnowBtn">Don’t know</button>
+          <button id="almostBtn">Almost</button>
+          <button id="knowBtn">Know</button>
         </div>
 
-        <div class="card-face card-back">
-          <p class="label">English</p>
-          <h2 id="englishWord"></h2>
+        <div class="nav-buttons">
+          <button id="prevBtn">Back</button>
+          <button id="flipBtn">Flip</button>
+          <button id="nextBtn">Next</button>
+        </div>
+
+        <button id="resetBtn" class="reset">Reset today</button>
+      </section>
+    </section>
+
+    <!-- SENTENCE COMPREHENSION MODE -->
+    <section id="sentenceMode" class="mode-section hidden">
+      <div class="sentence-card">
+        <p class="label">Sentence Comprehension</p>
+
+        <h2 id="sentenceText"></h2>
+
+        <div id="wordBank" class="word-bank"></div>
+
+        <p id="wordHint" class="word-hint">
+          Click a word to see its English meaning.
+        </p>
+
+        <textarea
+          id="sentenceAnswer"
+          placeholder="Write the full English meaning of the sentence..."
+        ></textarea>
+
+        <button id="showSentenceAnswerBtn">Show answer</button>
+
+        <p id="sentenceCorrectAnswer" class="correct-answer"></p>
+
+        <div class="grade-buttons">
+          <button id="sentenceNotCloseBtn">Not close</button>
+          <button id="sentenceAlmostBtn">Almost</button>
+          <button id="sentenceCorrectBtn">Correct</button>
+        </div>
+
+        <div class="nav-buttons">
+          <button id="sentencePrevBtn">Back</button>
+          <button id="sentenceNextBtn">Next</button>
         </div>
       </div>
     </section>
 
-    <section class="controls">
-      <input id="answerInput" placeholder="Type the meaning in English..." />
-      <button id="checkBtn">Check</button>
-      <p id="judgement"></p>
+    <!-- LIBRARY MODE -->
+    <section id="libraryMode" class="mode-section hidden">
+      <div class="library-card">
+        <p class="label">Library</p>
+        <h2>Vocab Days</h2>
 
-      <div class="grade-buttons">
-        <button id="dontKnowBtn">Don’t know</button>
-        <button id="almostBtn">Almost</button>
-        <button id="knowBtn">Know</button>
+        <div id="libraryList"></div>
       </div>
+    </section>
 
-      <div class="nav-buttons">
-        <button id="prevBtn">Back</button>
-        <button id="flipBtn">Flip</button>
-        <button id="nextBtn">Next</button>
+    <!-- TOOL BELT -->
+    <section class="tool-belt">
+      <p class="label">Tool Belt</p>
+
+      <div class="mode-buttons">
+        <button id="flashcardModeBtn">Flashcards</button>
+        <button id="sentenceModeBtn">Sentence Comprehension</button>
+        <button id="libraryModeBtn">Library</button>
       </div>
-
-      <button id="resetBtn" class="reset">Reset today</button>
     </section>
   </main>
 
+  <!-- DATA FILES -->
   <script src="data/vocab-2026-06-23.js"></script>
+  <script src="data/sentences-2026-06-23.js"></script>
+  <script src="data/days.js"></script>
+
+  <!-- MAIN APP LOGIC -->
   <script src="app.js"></script>
 </body>
 </html>

@@ -167,3 +167,108 @@ button {
   background: #333;
   color: white;
 }
+
+.hidden {
+  display: none;
+}
+
+.mode-section {
+  margin-top: 18px;
+}
+
+.tool-belt {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid #333;
+  border-radius: 18px;
+  background: #181818;
+}
+
+.mode-buttons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.mode-buttons button {
+  background: #252525;
+  color: white;
+  border: 1px solid #444;
+}
+
+.sentence-card,
+.library-card {
+  border: 1px solid #444;
+  border-radius: 24px;
+  background: #1c1c1c;
+  padding: 24px;
+  text-align: center;
+}
+
+.sentence-card h2 {
+  font-size: 24px;
+  line-height: 1.35;
+}
+
+.word-bank {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 18px 0;
+}
+
+.word-chip {
+  background: #2b2b2b;
+  color: white;
+  border: 1px solid #555;
+  padding: 9px 12px;
+  border-radius: 999px;
+}
+
+.word-chip:hover {
+  background: #3a3a3a;
+}
+
+.word-hint {
+  min-height: 24px;
+  font-size: 14px;
+  color: #ddd;
+}
+
+textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  margin: 12px 0;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+}
+
+.correct-answer {
+  min-height: 24px;
+  color: #ddd;
+  font-size: 14px;
+}
+
+.library-day {
+  width: 100%;
+  background: #252525;
+  color: white;
+  border: 1px solid #444;
+  margin-top: 10px;
+  text-align: left;
+}
+
+.library-day strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.library-day span {
+  opacity: 0.75;
+  font-size: 14px;
+}

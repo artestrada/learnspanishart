@@ -1,0 +1,169 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  background: #111;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app {
+  width: min(92vw, 520px);
+  padding: 24px;
+}
+
+.top {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+h1 {
+  margin-bottom: 4px;
+}
+
+.progress-wrap {
+  margin-top: 18px;
+}
+
+.progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  height: 12px;
+  width: 100%;
+  background: #333;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+#progressFill {
+  height: 100%;
+  width: 0%;
+  background: white;
+  transition: width 0.3s ease;
+}
+
+#goalText {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.card-area {
+  perspective: 1000px;
+}
+
+.flashcard {
+  height: 280px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+  cursor: pointer;
+}
+
+.flashcard.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  border: 1px solid #444;
+  border-radius: 24px;
+  background: #1c1c1c;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  backface-visibility: hidden;
+  padding: 24px;
+  text-align: center;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}
+
+.label {
+  opacity: 0.6;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+h2 {
+  font-size: 30px;
+  margin: 8px 0;
+}
+
+#wordType {
+  opacity: 0.7;
+  font-size: 14px;
+}
+
+.controls {
+  margin-top: 24px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+button {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+#checkBtn {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+#judgement {
+  min-height: 24px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.grade-buttons,
+.nav-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+#knowBtn {
+  background: #d8ffd8;
+}
+
+#almostBtn {
+  background: #fff4bf;
+}
+
+#dontKnowBtn {
+  background: #ffd3d3;
+}
+
+.reset {
+  width: 100%;
+  margin-top: 14px;
+  background: #333;
+  color: white;
+}

@@ -1,1 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn Spanish Art</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="top">
+      <h1>Learn Spanish Art</h1>
+      <p id="dateLabel">Daily vocab: 6/23/26</p>
 
+      <div class="progress-wrap">
+        <div class="progress-text">
+          <span id="progressText">0 / 0 mastered</span>
+          <span id="scoreText">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div id="progressFill"></div>
+        </div>
+        <p id="goalText">Goal: 85% understood</p>
+      </div>
+    </section>
+
+    <section class="card-area">
+      <div id="flashcard" class="flashcard">
+        <div class="card-face card-front">
+          <p class="label">Spanish</p>
+          <h2 id="spanishWord"></h2>
+          <p id="wordType"></p>
+        </div>
+
+        <div class="card-face card-back">
+          <p class="label">English</p>
+          <h2 id="englishWord"></h2>
+        </div>
+      </div>
+    </section>
+
+    <section class="controls">
+      <input id="answerInput" placeholder="Type the meaning in English..." />
+      <button id="checkBtn">Check</button>
+      <p id="judgement"></p>
+
+      <div class="grade-buttons">
+        <button id="dontKnowBtn">Don’t know</button>
+        <button id="almostBtn">Almost</button>
+        <button id="knowBtn">Know</button>
+      </div>
+
+      <div class="nav-buttons">
+        <button id="prevBtn">Back</button>
+        <button id="flipBtn">Flip</button>
+        <button id="nextBtn">Next</button>
+      </div>
+
+      <button id="resetBtn" class="reset">Reset today</button>
+    </section>
+  </main>
+
+  <script src="data/vocab-2026-06-23.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,11 +1,16 @@
 const days = window.LEARN_SPANISH_DAYS;
 
-let currentDayIndex = days.length -1;
+let currentDayIndex = days.length - 1;
 let currentMode = "flashcards";
 
 let currentCardIndex = 0;
 let currentSentenceIndex = 0;
 let flipped = false;
+
+let reviewMode = false;
+let goFor100Mode = false;
+let reviewQueue = [];
+let quotaMessageShown = false;
 
 function getCurrentDay() {
   return days[currentDayIndex];
@@ -57,6 +62,12 @@ const nextBtn = document.getElementById("nextBtn");
 const flipBtn = document.getElementById("flipBtn");
 const resetBtn = document.getElementById("resetBtn");
 
+const dailyCompleteBox = document.getElementById("dailyCompleteBox");
+const goFor100Btn = document.getElementById("goFor100Btn");
+const stayAt85Btn = document.getElementById("stayAt85Btn");
+const hintBox = document.getElementById("hintBox");
+const hintSentence = document.getElementById("hintSentence");
+
 const sentenceText = document.getElementById("sentenceText");
 const wordBank = document.getElementById("wordBank");
 const wordHint = document.getElementById("wordHint");
@@ -101,6 +112,93 @@ function roughJudge(userAnswer, correctAnswer) {
   if (matchRatio >= 0.5) return "close";
 
   return "wrong";
+}
+
+function getFlashcardPercent() {
+  const day = getCurrentDay();
+  const mastered = day.vocab.filter(card => savedCards[card.spanish] === "know").length;
+  return Math.round((mastered / day.vocab.length) * 100);
+}
+
+function getMissedCards() {
+  const day = getCurrentDay();
+
+  return day.vocab.filter(card => {
+    const grade = savedCards[card.spanish];
+    return grade === "almost" || grade === "dontKnow" || !grade;
+  });
+}
+
+function buildReviewQueue() {
+  reviewQueue = getMissedCards();
+  reviewMode = reviewQueue.length > 0;
+  currentCardIndex = 0;
+}
+
+function getCurrentFlashcard() {
+  const day = getCurrentDay();
+
+  if (reviewMode) {
+    return reviewQueue[currentCardIndex];
+  }
+
+  return day.vocab[currentCardIndex];
+}
+
+function getCurrentFlashcardTotal() {
+  const day = getCurrentDay();
+
+  if (reviewMode) {
+    return reviewQueue.length;
+  }
+
+  return day.vocab.length;
+}
+
+function findHintSentence(card) {
+  const day = getCurrentDay();
+  const target = normalize(card.spanish).split(" ")[0];
+
+  const foundSentence = day.sentences.find(sentence => {
+    const sentenceTextValue = normalize(sentence.spanish);
+    return sentenceTextValue.includes(target);
+  });
+
+  if (foundSentence) {
+    return foundSentence.spanish;
+  }
+
+  return `Try remembering this word in context: "${card.spanish}"`;
+}
+
+function updateHint() {
+  const card = getCurrentFlashcard();
+
+  if (!card || !reviewMode) {
+    hintBox.classList.add("hidden");
+    hintSentence.textContent = "";
+    return;
+  }
+
+  hintBox.classList.remove("hidden");
+  hintSentence.textContent = findHintSentence(card);
+}
+
+function maybeShowQuotaMessage() {
+  const percent = getFlashcardPercent();
+
+  if (currentMode !== "flashcards") return;
+  if (quotaMessageShown) return;
+  if (goFor100Mode) return;
+
+  if (percent >= 85) {
+    dailyCompleteBox.classList.remove("hidden");
+    quotaMessageShown = true;
+  }
+}
+
+function hideQuotaMessage() {
+  dailyCompleteBox.classList.add("hidden");
 }
 
 function setMode(mode) {
@@ -160,12 +258,28 @@ function updateProgress() {
 }
 
 function renderCard() {
-  const day = getCurrentDay();
-  const card = day.vocab[currentCardIndex];
+  const card = getCurrentFlashcard();
+  const total = getCurrentFlashcardTotal();
+
+  if (!card) {
+    spanishWord.textContent = "All done";
+    englishWord.textContent = "You finished the review queue.";
+    wordType.textContent = "Great work.";
+
+    answerInput.value = "";
+    judgement.textContent = "";
+
+    hintBox.classList.add("hidden");
+    updateProgress();
+    maybeShowQuotaMessage();
+    return;
+  }
 
   spanishWord.textContent = card.spanish;
   englishWord.textContent = card.english;
-  wordType.textContent = `${card.type} · ${currentCardIndex + 1} / ${day.vocab.length}`;
+
+  const modeLabel = reviewMode ? "Review round" : "First pass";
+  wordType.textContent = `${card.type} · ${modeLabel} · ${currentCardIndex + 1} / ${total}`;
 
   answerInput.value = "";
   judgement.textContent = "";
@@ -173,6 +287,7 @@ function renderCard() {
   flipped = false;
   flashcard.classList.remove("flipped");
 
+  updateHint();
   updateProgress();
 }
 
@@ -183,13 +298,50 @@ function flipCard() {
 
 function gradeCurrentCard(grade) {
   const day = getCurrentDay();
-  const card = day.vocab[currentCardIndex];
+  const card = getCurrentFlashcard();
+
+  if (!card) return;
 
   savedCards[card.spanish] = grade;
   saveProgress("flashcards", savedCards);
 
+  const percent = getFlashcardPercent();
+
+  if (percent >= 85 && !goFor100Mode) {
+    updateProgress();
+    maybeShowQuotaMessage();
+    return;
+  }
+
+  if (reviewMode) {
+    reviewQueue = getMissedCards();
+
+    if (reviewQueue.length === 0) {
+      currentCardIndex = 0;
+      updateProgress();
+      renderCard();
+      return;
+    }
+
+    if (currentCardIndex >= reviewQueue.length) {
+      currentCardIndex = 0;
+    }
+
+    renderCard();
+    return;
+  }
+
   if (currentCardIndex < day.vocab.length - 1) {
     currentCardIndex++;
+    renderCard();
+    return;
+  }
+
+  buildReviewQueue();
+
+  if (reviewQueue.length === 0) {
+    renderCard();
+    return;
   }
 
   renderCard();
@@ -252,6 +404,12 @@ function renderLibrary() {
       currentCardIndex = 0;
       currentSentenceIndex = 0;
 
+      reviewMode = false;
+      goFor100Mode = false;
+      reviewQueue = [];
+      quotaMessageShown = false;
+      hideQuotaMessage();
+
       savedCards = loadSaved("flashcards");
       savedSentences = loadSaved("sentences");
 
@@ -265,8 +423,10 @@ function renderLibrary() {
 }
 
 checkBtn.addEventListener("click", () => {
-  const day = getCurrentDay();
-  const card = day.vocab[currentCardIndex];
+  const card = getCurrentFlashcard();
+
+  if (!card) return;
+
   const result = roughJudge(answerInput.value, card.english);
 
   if (result === "correct") {
@@ -290,17 +450,23 @@ dontKnowBtn.addEventListener("click", () => gradeCurrentCard("dontKnow"));
 prevBtn.addEventListener("click", () => {
   if (currentCardIndex > 0) {
     currentCardIndex--;
-    renderCard();
   }
+
+  renderCard();
 });
 
 nextBtn.addEventListener("click", () => {
-  const day = getCurrentDay();
+  const total = getCurrentFlashcardTotal();
 
-  if (currentCardIndex < day.vocab.length - 1) {
+  if (currentCardIndex < total - 1) {
     currentCardIndex++;
-    renderCard();
+  } else if (!reviewMode) {
+    buildReviewQueue();
+  } else {
+    currentCardIndex = 0;
   }
+
+  renderCard();
 });
 
 flipBtn.addEventListener("click", flipCard);
@@ -308,9 +474,41 @@ flashcard.addEventListener("click", flipCard);
 
 resetBtn.addEventListener("click", () => {
   localStorage.removeItem(getStorageKey("flashcards"));
+
   savedCards = {};
   currentCardIndex = 0;
+  reviewMode = false;
+  goFor100Mode = false;
+  reviewQueue = [];
+  quotaMessageShown = false;
+
+  hideQuotaMessage();
   renderCard();
+});
+
+goFor100Btn.addEventListener("click", () => {
+  goFor100Mode = true;
+  hideQuotaMessage();
+
+  buildReviewQueue();
+
+  if (reviewQueue.length === 0) {
+    reviewMode = false;
+  }
+
+  renderCard();
+});
+
+stayAt85Btn.addEventListener("click", () => {
+  hideQuotaMessage();
+
+  spanishWord.textContent = "Daily goal complete";
+  englishWord.textContent = "You hit 85%. Good job.";
+  wordType.textContent = "Come back tomorrow or go to another mode.";
+
+  answerInput.value = "";
+  judgement.textContent = "";
+  hintBox.classList.add("hidden");
 });
 
 showSentenceAnswerBtn.addEventListener("click", () => {

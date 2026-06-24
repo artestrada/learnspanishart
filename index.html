@@ -66,6 +66,23 @@
         </div>
 
         <button id="resetBtn" class="reset">Reset today</button>
+
+        <!-- 85% DAILY QUOTA MESSAGE -->
+        <div id="dailyCompleteBox" class="daily-complete hidden">
+          <h3>Quota hit. Good job.</h3>
+          <p>You reached 85% for today.</p>
+
+          <div class="complete-buttons">
+            <button id="goFor100Btn">Go for 100%</button>
+            <button id="stayAt85Btn">Stop at 85%</button>
+          </div>
+        </div>
+
+        <!-- REVIEW MODE HINT SENTENCE -->
+        <div id="hintBox" class="hint-box hidden">
+          <p class="label">Hint sentence</p>
+          <p id="hintSentence"></p>
+        </div>
       </section>
     </section>
 
@@ -129,8 +146,10 @@
   <!-- DATA FILES -->
   <script src="data/vocab-2026-06-23.js"></script>
   <script src="data/sentences-2026-06-23.js"></script>
+
   <script src="data/vocab-2026-06-24.js"></script>
   <script src="data/sentences-2026-06-24.js"></script>
+
   <script src="data/days.js"></script>
 
   <!-- MAIN APP LOGIC -->

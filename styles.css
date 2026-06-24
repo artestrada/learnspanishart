@@ -149,15 +149,18 @@ button {
   margin-top: 10px;
 }
 
-#knowBtn {
+#knowBtn,
+#sentenceCorrectBtn {
   background: #d8ffd8;
 }
 
-#almostBtn {
+#almostBtn,
+#sentenceAlmostBtn {
   background: #fff4bf;
 }
 
-#dontKnowBtn {
+#dontKnowBtn,
+#sentenceNotCloseBtn {
   background: #ffd3d3;
 }
 
@@ -271,4 +274,46 @@ textarea {
 .library-day span {
   opacity: 0.75;
   font-size: 14px;
+}
+
+.daily-complete {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid #555;
+  background: #202020;
+  text-align: center;
+}
+
+.daily-complete h3 {
+  margin: 0 0 6px;
+}
+
+.daily-complete p {
+  margin: 0 0 12px;
+  opacity: 0.8;
+}
+
+.complete-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.hint-box {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid #444;
+  background: #181818;
+}
+
+.hint-box p {
+  margin: 6px 0;
+}
+
+#hintSentence {
+  font-size: 15px;
+  line-height: 1.4;
+  color: #ddd;
 }

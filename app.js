@@ -84,7 +84,7 @@ const sentenceNextBtn = document.getElementById("sentenceNextBtn");
 const libraryList = document.getElementById("libraryList");
 
 function normalize(text) {
-  return text
+  return String(text)
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -116,6 +116,11 @@ function roughJudge(userAnswer, correctAnswer) {
 
 function getFlashcardPercent() {
   const day = getCurrentDay();
+
+  if (!day.vocab || day.vocab.length === 0) {
+    return 0;
+  }
+
   const mastered = day.vocab.filter(card => savedCards[card.spanish] === "know").length;
   return Math.round((mastered / day.vocab.length) * 100);
 }
@@ -157,6 +162,11 @@ function getCurrentFlashcardTotal() {
 
 function findHintSentence(card) {
   const day = getCurrentDay();
+
+  if (!day.sentences || !Array.isArray(day.sentences)) {
+    return `Hint sentence unavailable. Try remembering this word: "${card.spanish}"`;
+  }
+
   const target = normalize(card.spanish).split(" ")[0];
 
   const foundSentence = day.sentences.find(sentence => {
@@ -313,35 +323,34 @@ function gradeCurrentCard(grade) {
     return;
   }
 
-  if (reviewMode) {
-    reviewQueue = getMissedCards();
-
-    if (reviewQueue.length === 0) {
-      currentCardIndex = 0;
-      updateProgress();
+  if (!reviewMode) {
+    if (currentCardIndex < day.vocab.length - 1) {
+      currentCardIndex++;
       renderCard();
       return;
     }
 
-    if (currentCardIndex >= reviewQueue.length) {
-      currentCardIndex = 0;
-    }
-
+    buildReviewQueue();
     renderCard();
     return;
   }
 
-  if (currentCardIndex < day.vocab.length - 1) {
-    currentCardIndex++;
-    renderCard();
-    return;
-  }
-
-  buildReviewQueue();
+  reviewQueue = getMissedCards();
 
   if (reviewQueue.length === 0) {
+    currentCardIndex = 0;
     renderCard();
     return;
+  }
+
+  if (currentCardIndex >= reviewQueue.length) {
+    currentCardIndex = 0;
+  } else {
+    currentCardIndex++;
+  }
+
+  if (currentCardIndex >= reviewQueue.length) {
+    currentCardIndex = 0;
   }
 
   renderCard();

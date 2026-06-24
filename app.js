@@ -1,6 +1,6 @@
 const days = window.LEARN_SPANISH_DAYS;
 
-let currentDayIndex = 0;
+let currentDayIndex = days.length -1;
 let currentMode = "flashcards";
 
 let currentCardIndex = 0;
